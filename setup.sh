@@ -117,11 +117,14 @@ setup_init(){
 	cd ${config_path}
 
 	format_echo "创建索引"
-	sudo dpkg-scanpackages apt_get /dev/null | gzip > ${config_path}/apt_get/Packages.gz
+	sudo dpkg-scanpackages ${config_path}/apt_get /dev/null | gzip > ${config_path}/apt_get/Packages.gz
+
+	sudo mkdir -p ${config_path}/apt_get/Release
+	sudo cp -f ${config_path}/apt_get/Packages.gz ${config_path}/apt_get/Release/Packages.gz
 	sleep 1
 
 	format_echo "替换源列表"
-	sudo mkdir -p /etc/apt_bak
+	sudo mkdir -p /etc/apt_bak/sources.list.d
 	if [ ! -f "/etc/apt/sources.list.default" ];then
 		sudo mv /etc/apt/sources.list /etc/apt_bak/sources.list.default
 	fi
@@ -145,10 +148,10 @@ setup_init(){
 #还原sources源
 reduct_sources(){
 	format_echo "还原源列表"
-	if [ -f "/etc/apt/sources.list.default" ];then
+	if [ -f "/etc/apt_bak/sources.list.default" ];then
 		sudo mv /etc/apt_bak/sources.list.default /etc/apt/sources.list
 	fi
-	if [ -f "/etc/apt/sources.list.d/raspi.list.default" ];then
+	if [ -f "/etc/apt_bak/sources.list.d/raspi.list.default" ];then
 		sudo mv /etc/apt_bak/sources.list.d/raspi.list.default /etc/apt/sources.list.d/raspi.list
 	fi
 
