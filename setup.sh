@@ -92,7 +92,7 @@ set_localtime(){
 	sudo cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 	format_echo "设置语言默认为中文"
-	sudo cp -f config/locale.gen /etc/locale.gen
+	sudo cp -f ${config_path}/config/locale.gen /etc/locale.gen
 	sudo locale-gen
 	sudo localectl set-locale LANG=zh_CN.UTF-8
 
@@ -121,13 +121,14 @@ setup_init(){
 	sleep 1
 
 	format_echo "替换源列表"
+	sudo mkdir -p /etc/apt_bak
 	if [ ! -f "/etc/apt/sources.list.default" ];then
-		sudo mv /etc/apt/sources.list /etc/apt/sources.list.default
+		sudo mv /etc/apt/sources.list /etc/apt_bak/sources.list.default
 	fi
 	sudo cp -f ${config_path}/config/sources.list.local /etc/apt/sources.list
 
 	if [ ! -f "/etc/apt/sources.list.d/raspi.list.default" ];then
-		sudo mv /etc/apt/sources.list.d/raspi.list /etc/apt/sources.list.d/raspi.list.default
+		sudo mv /etc/apt/sources.list.d/raspi.list /etc/apt_bak/sources.list.d/raspi.list.default
 	fi
 	sudo cp -f ${config_path}/config/raspi.list.local /etc/apt/sources.list.d/raspi.list
 	sleep 1
@@ -145,10 +146,10 @@ setup_init(){
 reduct_sources(){
 	format_echo "还原源列表"
 	if [ -f "/etc/apt/sources.list.default" ];then
-		sudo mv /etc/apt/sources.list.default /etc/apt/sources.list
+		sudo mv /etc/apt_bak/sources.list.default /etc/apt/sources.list
 	fi
 	if [ -f "/etc/apt/sources.list.d/raspi.list.default" ];then
-		sudo mv /etc/apt/sources.list.d/raspi.list.default /etc/apt/sources.list.d/raspi.list
+		sudo mv /etc/apt_bak/sources.list.d/raspi.list.default /etc/apt/sources.list.d/raspi.list
 	fi
 
 	format_echo "更新软件索引"
