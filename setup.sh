@@ -120,6 +120,8 @@ setup_init(){
 	sudo dpkg-scanpackages ${config_path}/apt_get /dev/null | gzip > ${config_path}/apt_get/Packages.gz
 
 	sudo mkdir -p ${config_path}/apt_get/Release
+	sudo chmod -R 777 ${config_path}/apt_get/Release
+	
 	sudo cp -f ${config_path}/apt_get/Packages.gz ${config_path}/apt_get/Release/Packages.gz
 	sleep 1
 
