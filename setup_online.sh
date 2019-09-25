@@ -237,9 +237,9 @@ setup_other(){
 	# 使用本地源安装 如果用户没有安装声音，这一步还是需要做
 	#setup_init
 
+	format_echo "安装基本库"
 	sudo apt-get -y install libjpeg-dev
-	sudo apt-get -y install libatlas-base-dev
-	sudo apt-get -y install libhdf5-dev 
+	sudo apt-get -y install libhdf5-dev
 	sudo apt-get -y install libtiff5-dev
 	sudo apt-get -y install libpng12-dev
 	sudo apt-get -y install libqtgui4 libqt4-test
@@ -273,23 +273,23 @@ setup_other(){
 	sudo apt-get -y install ntpdate
 
 	format_echo "PIP安装pycurl包"
-	sudo pip3 install ${config_path}/pip/pycurl-7.43.0.2-cp35-cp35m-linux_armv7l.whl
+	sudo pip3 install ${config_path}/pip/pycurl-7.43.0.3-cp37-cp37m-linux_armv7l.whl
 
-	format_echo "PIP安装内存检测模块包"
+	format_echo "PIP安装psutil包"
 	sudo pip3 install ${config_path}/pip/psutil-5.6.2.tar.gz
 	
 	format_echo "PIP安装websocket_client包"
 	sudo pip3 install ${config_path}/pip/websocket_client-0.56.0-py2.py3-none-any.whl
 
 	format_echo "PIP安装webrtcvad包"
-	sudo pip3 install ${config_path}/pip/webrtcvad-2.0.10-cp35-cp35m-linux_armv7l.whl
+	sudo pip3 install ${config_path}/pip/webrtcvad-2.0.10-cp37-cp37m-linux_armv7l.whl
 
 	format_echo "PIP安装imutils包"
-	sudo pip3 install ${config_path}/pip/imutils-0.5.2-py3-none-any.whl
+	sudo pip3 install ${config_path}/pip/imutils-0.5.3-py3-none-any.whl
 
 	format_echo "PIP安装opencv包"
-	sudo pip3 install ${config_path}/pip/opencv_python-3.4.4.19-cp35-cp35m-linux_armv7l.whl
-	sudo pip3 install ${config_path}/pip/opencv_contrib_python-3.4.4.19-cp35-cp35m-linux_armv7l.whl
+	sudo pip3 install ${config_path}/pip/opencv_python-3.4.3.18-cp37-cp37m-linux_armv7l.whl
+	sudo pip3 install ${config_path}/pip/opencv_contrib_python-3.4.3.18-cp37-cp37m-linux_armv7l.whl
 
 	format_echo "安装其他功能包完成" 1
 	sleep 1
