@@ -77,10 +77,10 @@ start(){
  # @说明: 修改用户密码
 ###
 set_userpass(){
-	format_echo "设置 Pi 密码" 1
+	format_echo "修改Pi用户密码（如不修改直接按回车跳过）"
 	sudo passwd pi
 
-	format_echo "设置 Root 密码:" 1
+	format_echo "修改Root用户密码（如不修改直接按回车跳过）"
 	sudo passwd root
 
 	if [ $IS_AKEY -eq 0 ]; then start; fi
@@ -177,8 +177,8 @@ setup_sound(){
 	# 使用本地源安装 
 	setup_init
 
-	apt-get -y --allow-unauthenticated install raspberrypi-kernel-headers raspberrypi-kernel
-	apt-get -y --allow-unauthenticated install dkms git i2c-tools libasound2-plugins
+	sudo apt-get -y --allow-unauthenticated install raspberrypi-kernel-headers raspberrypi-kernel
+	sudo apt-get -y --allow-unauthenticated install dkms git i2c-tools libasound2-plugins
 
 	sudo chmod -R 777 ${config_path}/Github/
 
