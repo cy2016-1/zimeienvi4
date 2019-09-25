@@ -118,21 +118,16 @@ setup_init(){
 
 	format_echo "创建索引"
 	sudo dpkg-scanpackages ${config_path}/apt_get /dev/null | gzip > ${config_path}/apt_get/Packages.gz
-
-	sudo mkdir -p ${config_path}/apt_get/Release
-	sudo chmod -R 777 ${config_path}/apt_get/Release
-	
-	sudo cp -f ${config_path}/apt_get/Packages.gz ${config_path}/apt_get/Release/Packages.gz
 	sleep 1
 
 	format_echo "替换源列表"
 	sudo mkdir -p /etc/apt_bak/sources.list.d
-	if [ ! -f "/etc/apt/sources.list.default" ];then
+	if [ ! -f "/etc/apt_bak/sources.list.default" ];then
 		sudo mv /etc/apt/sources.list /etc/apt_bak/sources.list.default
 	fi
 	sudo cp -f ${config_path}/config/sources.list.local /etc/apt/sources.list
 
-	if [ ! -f "/etc/apt/sources.list.d/raspi.list.default" ];then
+	if [ ! -f "/etc/apt_bak/sources.list.d/raspi.list.default" ];then
 		sudo mv /etc/apt/sources.list.d/raspi.list /etc/apt_bak/sources.list.d/raspi.list.default
 	fi
 	sudo cp -f ${config_path}/config/raspi.list.local /etc/apt/sources.list.d/raspi.list
