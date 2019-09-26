@@ -178,10 +178,10 @@ setup_sound(){
 	setup_init
 
 	format_echo "安装声卡依赖"
-	sudo dpkg -i ${config_path}/apt_get/raspberrypi-kernel-headers_*.deb	
-	sudo dpkg -i ${config_path}/apt_get/raspberrypi-kernel_*.deb
-	sudo dpkg -i ${config_path}/apt_get/dkms_*.deb
-	sudo dpkg -i ${config_path}/apt_get/libasound2-plugins_*.deb
+	sudo dpkg -i ${config_path}/sound/raspberrypi-kernel-headers_*.deb	
+	sudo dpkg -i ${config_path}/sound/raspberrypi-kernel_*.deb
+	sudo dpkg -i ${config_path}/sound/dkms_*.deb
+	sudo dpkg -i ${config_path}/sound/libasound2-plugins_*.deb
 	
 	#sudo apt-get -y --allow-unauthenticated install i2c-tools
 
