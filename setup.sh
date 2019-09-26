@@ -178,11 +178,12 @@ setup_sound(){
 	setup_init
 
 	format_echo "安装声卡依赖"
-	sudo apt-get -y --allow-unauthenticated install raspberrypi-kernel-headers
-	sudo apt-get -y --allow-unauthenticated install raspberrypi-kernel
-	sudo apt-get -y --allow-unauthenticated install dkms
-	sudo apt-get -y --allow-unauthenticated install i2c-tools
-	sudo apt-get -y --allow-unauthenticated install libasound2-plugins
+	sudo dpkg -i ${config_path}/apt_get/raspberrypi-kernel-headers_*.deb	
+	sudo dpkg -i ${config_path}/apt_get/raspberrypi-kernel_*.deb
+	sudo dpkg -i ${config_path}/apt_get/dkms_*.deb
+	sudo dpkg -i ${config_path}/apt_get/libasound2-plugins_*.deb
+	
+	#sudo apt-get -y --allow-unauthenticated install i2c-tools
 
 	sudo chmod -R 777 ${config_path}/Github/
 
@@ -233,8 +234,6 @@ set_system(){
 
 #安装其他功能包
 setup_other(){
-	format_echo "安装视频环境"
-
 	# 系统基本设置
 	set_system
 
@@ -242,39 +241,7 @@ setup_other(){
 	setup_init
 
 	format_echo "安装基本库"
-	sudo apt-get -y --allow-unauthenticated install libjpeg-dev
-	sudo apt-get -y --allow-unauthenticated install libhdf5-dev 
-	sudo apt-get -y --allow-unauthenticated install libtiff5-dev
-	sudo apt-get -y --allow-unauthenticated install libpng12-dev
-	sudo apt-get -y --allow-unauthenticated install libqtgui4 libqt4-test
-	sudo apt-get -y --allow-unauthenticated install libjasper-dev
-
-	format_echo "安装中文字库"
-	sudo apt-get -y --allow-unauthenticated install ttf-wqy-zenhei
-
-	format_echo "安装鼠标隐藏功能"
-	sudo apt-get -y --allow-unauthenticated install unclutter
-
-	format_echo "安装创建热点功能包"
-	sudo apt-get -y --allow-unauthenticated install hostapd dnsmasq
-
-	format_echo "安装Nmap网络扫描功能包"
-	sudo apt-get -y --allow-unauthenticated install nmap
-
-	format_echo "安装GPIO功能包"
-	sudo apt-get -y --allow-unauthenticated install python3-rpi.gpio
-
-	format_echo "安装MPG123功能包"
-	sudo apt-get -y --allow-unauthenticated install mpg123
-
-	format_echo "安装python3-pyaudio功能包"
-	sudo apt-get -y --allow-unauthenticated install python3-pyaudio
-
-	format_echo "安装libatlas功能包"
-	sudo apt-get -y --allow-unauthenticated install libatlas-base-dev
-
-	format_echo "安装ntpdate功能包"
-	sudo apt-get -y --allow-unauthenticated install ntpdate
+	sudo dpkg -i ${config_path}/apt_get/*.deb
 
 	format_echo "PIP安装pycurl包"
 	sudo pip3 install ${config_path}/pip/pycurl-7.43.0.3-cp37-cp37m-linux_armv7l.whl
