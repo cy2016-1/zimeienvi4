@@ -24,6 +24,8 @@ calc_wt_size() {
   WT_HEIGHT=16
   WT_WIDTH=50
   WT_MENU_HEIGHT=$(($WT_HEIGHT-7))
+
+  sudo rm -f /etc/xdg/autostart/piwiz.desktop
 }
 calc_wt_size
 
