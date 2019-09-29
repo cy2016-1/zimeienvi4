@@ -156,6 +156,8 @@ reduct_sources(){
 
 	format_echo "更新软件索引"
 	sudo apt-get update
+
+	sudo apt -y --fix-broken install
 	
 	format_echo "还原源列表完成" 1
 	sleep 1
