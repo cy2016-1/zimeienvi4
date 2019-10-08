@@ -79,10 +79,10 @@ start(){
  # @说明: 修改用户密码
 ###
 set_userpass(){
-	format_echo "修改Pi用户密码（如不修改直接按回车跳过）"
+	format_echo "修改Pi用户密码（安全考虑建议修改）"
 	sudo passwd pi
 
-	format_echo "修改Root用户密码（如不修改直接按回车跳过）"
+	format_echo "修改Root用户密码（安全考虑建议修改）"
 	sudo passwd root
 
 	if [ $IS_AKEY -eq 0 ]; then start; fi
