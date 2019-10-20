@@ -6,7 +6,7 @@ IS_INIT=0
 #是否一键安装
 IS_AKEY=0
 
-config_path='/var/zimeiconf'
+config_path='/tmp/zimeiconf'
 
 THIS_PATH=$(cd `dirname $0`; pwd)
 
