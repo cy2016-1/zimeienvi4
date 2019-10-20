@@ -190,8 +190,6 @@ setup_sound(){
 	sudo dpkg -i ${config_path}/sound/raspberrypi-kernel_*.deb
 	sudo dpkg -i ${config_path}/sound/dkms_*.deb
 	sudo dpkg -i ${config_path}/sound/libasound2-plugins_*.deb
-	
-	#sudo apt-get -y --allow-unauthenticated install i2c-tools
 
 	sudo chmod -R 777 ${config_path}/Github/
 
