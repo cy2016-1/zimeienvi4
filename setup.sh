@@ -22,14 +22,6 @@ format_echo(){
 #删除一些不要的软件
 del_garbage(){
 	sudo rm -f /etc/xdg/autostart/piwiz.desktop
-	sudo apt-get -y remove geany
-	sudo apt-get -y remove thonny
-	sudo apt-get -y remove qpdfview
-	sudo apt-get -y remove mousepad
-	sudo apt-get -y remove leafpad
-	sudo apt-get -y remove galculator
-	sudo apt-get -y remove xarchiver
-	sudo apt-get -y remove gpicview
 }
 del_garbage
 
