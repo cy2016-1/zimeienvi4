@@ -283,9 +283,6 @@ akey_setup(){
 	setup_other
 	reduct_sources
 	IS_AKEY=0
-	whiptail --infobox "系统配置成功，系统5秒钟后重启。" 8 60
-	sleep 5
-	sudo reboot
 }
 
 start
