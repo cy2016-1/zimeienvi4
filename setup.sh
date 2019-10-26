@@ -389,6 +389,7 @@ akey_setup(){
 	IS_AKEY=1
 	set_userpass
 	set_localtime
+	setup_camera
 	setup_sound
 	setup_other
 	reduct_sources
