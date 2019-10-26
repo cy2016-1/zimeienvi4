@@ -8,6 +8,8 @@ IS_AKEY=0
 
 config_path='/tmp/zimeiconf'
 
+CONFIG=/boot/config.txt
+
 THIS_PATH=$(cd `dirname $0`; pwd)
 
 #格式化echo 
@@ -18,6 +20,50 @@ format_echo(){
 		echo "\033[92m${1}\033[0m"
 	fi
 }
+
+set_config_var() {
+  lua - "$1" "$2" "$3" <<EOF > "$3.bak"
+local key=assert(arg[1])
+local value=assert(arg[2])
+local fn=assert(arg[3])
+local file=assert(io.open(fn))
+local made_change=false
+for line in file:lines() do
+  if line:match("^#?%s*"..key.."=.*$") then
+    line=key.."="..value
+    made_change=true
+  end
+  print(line)
+end
+
+if not made_change then
+  print(key.."="..value)
+end
+EOF
+sudo mv "$3.bak" "$3"
+}
+
+#获取指定配置文件中对应的值
+get_config_var() {
+  lua - "$1" "$2" <<EOF
+local key=assert(arg[1])
+local fn=assert(arg[2])
+local file=assert(io.open(fn))
+local found=false
+for line in file:lines() do
+  local val = line:match("^%s*"..key.."=(.*)$")
+  if (val ~= nil) then
+    print(val)
+    found=true
+    break
+  end
+end
+if not found then
+   print(0)
+end
+EOF
+}
+
 
 #删除一些不要的软件
 del_garbage(){
@@ -39,8 +85,9 @@ start(){
 		"1" "一键安装设置全部环境" \
 		"2" "修改pi和root用户密码" \
 		"3" "设置系统时区和语言默认为中文" \
-        "4" "安装声卡驱动" \
-        "5" "安装自美系统必备模块" \
+		"4" "安装默认摄像头驱动" \
+        "5" "安装声卡驱动" \
+        "6" "安装自美系统必备模块" \
         "R" "还原离线安装环境" \
         "X" "退出" \
         3>&1 1>&2 2>&3)
@@ -59,10 +106,14 @@ start(){
 	    	set_localtime
 	    ;;
 	    4)
+	    	format_echo "开始安装摄像头驱动"
+	    	setup_camera
+	    ;;
+	    5)
 	    	format_echo "开始安装声卡驱动"
 	    	setup_sound
 	    ;;
-	    5)
+	    6)
 	    	format_echo '开始环境必备模块'
 	    	setup_other
 	    ;;
@@ -167,6 +218,65 @@ reduct_sources(){
 	sleep 1
 
 	if [ $IS_AKEY -eq 0 ]; then start; fi
+}
+
+get_camera() {
+  CAM=$(get_config_var start_x $CONFIG)
+  if [ $CAM -eq 1 ]; then
+    echo 0
+  else
+    echo 1
+  fi
+}
+
+#安装摄像头
+setup_camera() {
+  if [ ! -e /boot/start_x.elf ]; then
+  	whiptail --msgbox "您的系统版本太旧了(没有start_x.elf)。请更新系统" 20 60 2
+    return 1
+  fi
+  sed $CONFIG -i -e "s/^startx/#startx/"
+  sed $CONFIG -i -e "s/^fixup_file/#fixup_file/"
+
+  DEFAULT=--defaultno
+  CURRENT=0
+  if [ $(get_camera) -eq 0 ]; then
+    DEFAULT=
+    CURRENT=1
+  fi
+
+  RET=1
+  if [ $IS_AKEY -eq 0 ]; then
+    if (whiptail --yes-button "启用" --no-button "禁用" --yesno "您是否启用摄像头?" 20 60) then
+    	RET=1
+    else
+    	RET=0
+    fi
+  fi
+
+  if [ $RET -eq $CURRENT ]; then
+    STATUS="启用"
+    return $STATUS
+  fi
+  
+  if [ $RET -eq 1 ]; then
+    set_config_var start_x 1 $CONFIG
+    CUR_GPU_MEM=$(get_config_var gpu_mem $CONFIG)
+    if [ -z "$CUR_GPU_MEM" ] || [ "$CUR_GPU_MEM" -lt 128 ]; then
+      set_config_var gpu_mem 128 $CONFIG
+    fi
+    STATUS="启用"
+  elif [ $RET -eq 0 ]; then
+    set_config_var start_x 0 $CONFIG
+    sed $CONFIG -i -e "s/^start_file/#start_file/"
+    STATUS="禁用"
+  else
+    return $RET
+  fi
+  
+  if [ $IS_AKEY -eq 0 ]; then
+    whiptail --msgbox "摄像头已 $STATUS" 20 60 1
+  fi
 }
 
 #安装声卡
