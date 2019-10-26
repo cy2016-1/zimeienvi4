@@ -202,11 +202,11 @@ setup_init(){
 #还原sources源
 reduct_sources(){
 	format_echo "还原源列表"
-	if [ -f "/etc/apt_bak/sources.list.default" ];then
-		sudo mv /etc/apt_bak/sources.list.default /etc/apt/sources.list
+	if [ -f "${config_path}/config/sources.list.tsinghua" ];then
+		sudo mv ${config_path}/config/sources.list.tsinghua /etc/apt/sources.list
 	fi
-	if [ -f "/etc/apt_bak/sources.list.d/raspi.list.default" ];then
-		sudo mv /etc/apt_bak/sources.list.d/raspi.list.default /etc/apt/sources.list.d/raspi.list
+	if [ -f "${config_path}/config/raspi.list.tsinghua" ];then
+		sudo mv ${config_path}/config/raspi.list.tsinghua /etc/apt/sources.list.d/raspi.list
 	fi
 
 	format_echo "更新软件索引"
