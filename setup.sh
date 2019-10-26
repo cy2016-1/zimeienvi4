@@ -299,6 +299,8 @@ setup_sound(){
 	sudo dpkg -i ${config_path}/sound/raspberrypi-kernel-headers_*.deb	
 	sudo dpkg -i ${config_path}/sound/raspberrypi-kernel_*.deb
 	sudo dpkg -i ${config_path}/sound/dkms_*.deb
+	sudo dpkg -i ${config_path}/sound/libasound2_*.deb
+	sudo dpkg -i ${config_path}/sound/libasound2-data_*.deb
 	sudo dpkg -i ${config_path}/sound/libasound2-plugins_*.deb
 
 	sudo chmod -R 777 ${config_path}/Github/
