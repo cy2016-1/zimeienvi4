@@ -256,7 +256,7 @@ setup_camera() {
 
   if [ $RET -eq $CURRENT ]; then
     STATUS="启用"
-    return $STATUS
+    return 1
   fi
   
   if [ $RET -eq 1 ]; then
