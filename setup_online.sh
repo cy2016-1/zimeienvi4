@@ -263,6 +263,9 @@ setup_other(){
 	format_echo "安装MPG123功能包"
 	sudo apt-get -y install mpg123
 
+	format_echo "安装播放器mplayer功能包"
+	sudo apt-get -y install mplayer
+
 	format_echo "安装python3-pyaudio功能包"
 	sudo apt-get -y install python3-pyaudio
 
