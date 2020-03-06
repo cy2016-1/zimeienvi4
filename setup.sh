@@ -379,6 +379,7 @@ setup_other(){
 	sudo pip3 install ${config_path}/pip/opencv_contrib_python-3.4.3.18-cp37-cp37m-linux_armv7l.whl
 
 	format_echo "安装其他功能包完成" 1
+	sudo pip3 install ${config_path}/pip/ruamel.yaml-0.16.10-py2.py3-none-any.whl
 	sleep 1
 	
 	if [ $IS_AKEY -eq 0 ]; then start; fi	
