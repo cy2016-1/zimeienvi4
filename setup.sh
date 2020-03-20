@@ -116,6 +116,7 @@ start(){
 	    6)
 	    	format_echo '开始环境必备模块'
 	    	setup_other
+	    	setup_mosquitto
 	    ;;
 	    "r"|"R")
 	    	format_echo '还原离线安装环境'
@@ -310,6 +311,23 @@ setup_sound(){
 	if [ $IS_AKEY -eq 0 ]; then start; fi
 }
 
+setup_mosquitto(){
+	format_echo "开始安装mqtt服务器"
+
+	format_echo "安装依赖"
+	sudo dpkg -i ${config_path}/apt_get/libssl*.deb
+	sudo dpkg -i ${config_path}/apt_get/libc-ares*.deb
+	sudo dpkg -i ${config_path}/apt_get/uuid*.deb
+	sudo tar zxfv ${config_path}/pip/mosquitto-1.6.9.tar.gz
+	cd ${config_path}/pip/mosquitto-1.6.9
+	make
+	sudo make install
+	sudo ln -s /usr/local/lib/libmosquitto.so.1 /usr/lib/libmosquitto.so.1
+	sudo ldconfig
+	sudo cp -f ${config_path}/config/mosquitto.conf /etc/mosquitto/mosquitto.conf
+	cd ${config_path}
+}
+
 # 系统设置
 set_system(){
 	format_echo "设置开机动画"
@@ -393,6 +411,7 @@ akey_setup(){
 	setup_camera
 	setup_sound
 	setup_other
+	setup_mosquitto
 	reduct_sources
 	IS_AKEY=0
 }
