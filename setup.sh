@@ -83,11 +83,12 @@ calc_wt_size
 start(){
 	FUN=$(whiptail --title "请选择安装软件（直接选中回车）" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button 取消 --ok-button 确定 \
 		"1" "一键安装设置全部环境" \
-		"2" "修改pi和root用户密码" \
-		"3" "设置系统时区和语言默认为中文" \
+		"2" "修改pi和root用户密码为: Keyicx" \
+		"3" "系统基本设置" \
 		"4" "安装默认摄像头驱动" \
         "5" "安装声卡驱动" \
         "6" "安装自美系统必备模块" \
+        "7" "安装MQTT服务器模块" \
         "R" "还原离线安装环境" \
         "X" "退出" \
         3>&1 1>&2 2>&3)
@@ -98,11 +99,11 @@ start(){
 	    	akey_setup
 	    ;;
 		2)
-	    	format_echo "开始修改pi和root用户密码"
+	    	format_echo "开始修改pi和root用户密码为: Keyicx"
 	    	set_userpass
 	    ;;
 		3)
-	    	format_echo "设置系统语言默认为中文"
+	    	format_echo "系统基本设置"
 	    	set_localtime
 	    ;;
 	    4)
@@ -116,6 +117,9 @@ start(){
 	    6)
 	    	format_echo '开始环境必备模块'
 	    	setup_other
+	    ;;
+	    7)
+	    	format_echo '开始安装MQTT服务器'
 	    	setup_mosquitto
 	    ;;
 	    "r"|"R")
@@ -135,13 +139,57 @@ start(){
  # @说明: 修改用户密码
 ###
 set_userpass(){
-	format_echo "修改Pi用户密码（安全考虑建议修改）"
-	sudo passwd pi
+	format_echo "修改Pi用户密码为: Keyicx"
+	sudo passwd pi <<EOF
+Keyicx
+Keyicx
+EOF
 
-	format_echo "修改Root用户密码（安全考虑建议修改）"
-	sudo passwd root
+	format_echo "修改Root用户密码: Keyicx"
+	sudo passwd root <<EOF
+Keyicx
+Keyicx
+EOF
 
 	if [ $IS_AKEY -eq 0 ]; then start; fi
+}
+
+# 系统设置
+set_system(){
+	format_echo "设置开机动画"
+	sudo mv /usr/share/plymouth/themes/pix/splash.png /usr/share/plymouth/themes/pix/splash_bak.png
+	sleep 1
+
+	sudo cp -f ${config_path}/config/splash.png /usr/share/plymouth/themes/pix/splash.png
+	sleep 1
+
+	format_echo "设备任务栏"
+	sudo mv /home/pi/.config/lxpanel/LXDE-pi/panels/panel /home/pi/.config/lxpanel/LXDE-pi/panels/panel_bak
+	sleep 1
+
+	sudo mkdir -p /home/pi/.config/lxpanel/LXDE-pi/panels
+	sleep 1
+
+	sudo cp -f ${config_path}/config/panel /home/pi/.config/lxpanel/LXDE-pi/panels/panel
+
+	format_echo "设置桌面"
+	sudo mv /home/pi/.config/pcmanfm/LXDE-pi/desktop-items-0.conf /home/pi/.config/pcmanfm/LXDE-pi/desktop-items-0.conf.bak
+	sleep 1
+
+	sudo mkdir -p /home/pi/.config/pcmanfm/LXDE-pi
+	sleep 1
+
+	sudo cp -f ${config_path}/config/desktop-items-0.conf /home/pi/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+
+	format_echo "设置桌面背景"
+	sudo rm -f /usr/share/rpd-wallpaper/road.jpg
+	sleep 1
+	
+	sudo cp -f ${config_path}/config/road.jpg /usr/share/rpd-wallpaper/road.jpg
+
+	format_echo "设备顶部LOGO不显示"
+	sudo sed -i s/'console=tty1'/'console=tty3'/g /boot/cmdline.txt
+	sudo sed -i s/'ignore-serial-consoles'/'ignore-serial-consoles logo.nologo loglevel=3'/g /boot/cmdline.txt
 }
 
 # 系统时区设置
@@ -153,6 +201,9 @@ set_localtime(){
 	sudo cp -f ${config_path}/config/locale.gen /etc/locale.gen
 	sudo locale-gen
 	sudo localectl set-locale LANG=zh_CN.UTF-8
+
+	# 系统基本设置
+	set_system
 
 	if [ $IS_AKEY -eq 0 ]; then start; fi
 }
@@ -315,62 +366,24 @@ setup_mosquitto(){
 	format_echo "开始安装mqtt服务器"
 
 	format_echo "安装依赖"
+	cd ${config_path}
 	sudo dpkg -i ${config_path}/apt_get/libssl*.deb
 	sudo dpkg -i ${config_path}/apt_get/libc-ares*.deb
 	sudo dpkg -i ${config_path}/apt_get/uuid*.deb
 	sudo tar zxfv ${config_path}/pip/mosquitto-1.6.9.tar.gz
-	cd ${config_path}/pip/mosquitto-1.6.9
-	make
+	cd ${config_path}/mosquitto-1.6.9
+	sudo make
 	sudo make install
 	sudo ln -s /usr/local/lib/libmosquitto.so.1 /usr/lib/libmosquitto.so.1
 	sudo ldconfig
 	sudo cp -f ${config_path}/config/mosquitto.conf /etc/mosquitto/mosquitto.conf
 	cd ${config_path}
-}
 
-# 系统设置
-set_system(){
-	format_echo "设置开机动画"
-	sudo mv /usr/share/plymouth/themes/pix/splash.png /usr/share/plymouth/themes/pix/splash_bak.png
-	sleep 1
-
-	sudo cp -f ${config_path}/config/splash.png /usr/share/plymouth/themes/pix/splash.png
-	sleep 1
-
-	format_echo "设备任务栏"
-	sudo mv /home/pi/.config/lxpanel/LXDE-pi/panels/panel /home/pi/.config/lxpanel/LXDE-pi/panels/panel_bak
-	sleep 1
-
-	sudo mkdir -p /home/pi/.config/lxpanel/LXDE-pi/panels
-	sleep 1
-
-	sudo cp -f ${config_path}/config/panel /home/pi/.config/lxpanel/LXDE-pi/panels/panel
-
-	format_echo "设置桌面"
-	sudo mv /home/pi/.config/pcmanfm/LXDE-pi/desktop-items-0.conf /home/pi/.config/pcmanfm/LXDE-pi/desktop-items-0.conf.bak
-	sleep 1
-
-	sudo mkdir -p /home/pi/.config/pcmanfm/LXDE-pi
-	sleep 1
-
-	sudo cp -f ${config_path}/config/desktop-items-0.conf /home/pi/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
-
-	format_echo "设置桌面背景"
-	sudo rm -f /usr/share/rpd-wallpaper/road.jpg
-	sleep 1
-	
-	sudo cp -f ${config_path}/config/road.jpg /usr/share/rpd-wallpaper/road.jpg
-
-	format_echo "设备顶部LOGO不显示"
-	sudo sed -i s/'console=tty1'/'console=tty3'/g /boot/cmdline.txt
-	sudo sed -i s/'ignore-serial-consoles'/'ignore-serial-consoles logo.nologo loglevel=3'/g /boot/cmdline.txt
+	if [ $IS_AKEY -eq 0 ]; then start; fi
 }
 
 #安装其他功能包
 setup_other(){
-	# 系统基本设置
-	set_system
-
 	# 使用本地源安装 如果用户没有安装声音，这一步还是需要做
 	setup_init
 
