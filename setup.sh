@@ -185,7 +185,7 @@ set_system(){
 	sudo rm -f /usr/share/rpd-wallpaper/road.jpg
 	sleep 1
 	
-	sudo cp -f ${config_path}/config/road.jpg /usr/share/rpd-wallpaper/road.jpg
+	sudo cp -f ${config_path}/config/fjord.jpg /usr/share/rpd-wallpaper/road.jpg
 
 	format_echo "设备顶部LOGO不显示"
 	sudo sed -i s/'console=tty1'/'console=tty3'/g /boot/cmdline.txt
@@ -409,7 +409,7 @@ setup_other(){
 	sudo pip3 install ${config_path}/pip/opencv_python-3.4.3.18-cp37-cp37m-linux_armv7l.whl
 	sudo pip3 install ${config_path}/pip/opencv_contrib_python-3.4.3.18-cp37-cp37m-linux_armv7l.whl
 
-	format_echo "安装其他功能包完成" 1
+	format_echo "PIP安装ruamel.yaml包" 1
 	sudo pip3 install ${config_path}/pip/ruamel.yaml-0.16.10-py2.py3-none-any.whl
 	sleep 1
 	
