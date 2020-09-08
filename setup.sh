@@ -82,43 +82,43 @@ calc_wt_size
 #开始接收输入
 start(){
 	FUN=$(whiptail --title "请选择安装软件（直接选中回车）" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button 取消 --ok-button 确定 \
-		"1" "一键安装设置全部环境" \
-		"2" "修改pi和root用户密码为: Keyicx" \
-		"3" "系统基本设置" \
-		"4" "安装默认摄像头驱动" \
-        "5" "安装声卡驱动" \
-        "6" "安装自美系统必备模块" \
-        "7" "安装MQTT服务器模块" \
+		"A" "一键安装设置全部环境" \
+		"1" "修改pi和root用户密码为: Keyicx" \
+		"2" "系统基本设置" \
+		"3" "安装默认摄像头驱动" \
+        "4" "安装声卡驱动" \
+        "5" "安装自美系统必备模块" \
+        "6" "安装MQTT服务器模块" \
         "R" "还原离线安装环境" \
         "X" "退出" \
         3>&1 1>&2 2>&3)
 
 	case $FUN in
-		1)
+		"a"|"A")
 	    	format_echo "一键安装全部环境"
 	    	akey_setup
 	    ;;
-		2)
+		1)
 	    	format_echo "开始修改pi和root用户密码为: Keyicx"
 	    	set_userpass
 	    ;;
-		3)
+		2)
 	    	format_echo "系统基本设置"
 	    	set_localtime
 	    ;;
-	    4)
+	    3)
 	    	format_echo "开始安装摄像头驱动"
 	    	setup_camera
 	    ;;
-	    5)
+	    4)
 	    	format_echo "开始安装声卡驱动"
 	    	setup_sound
 	    ;;
-	    6)
+	    5)
 	    	format_echo '开始环境必备模块'
 	    	setup_other
 	    ;;
-	    7)
+	    6)
 	    	format_echo '开始安装MQTT服务器'
 	    	setup_mosquitto
 	    ;;
@@ -409,7 +409,7 @@ setup_other(){
 	sudo pip3 install ${config_path}/pip/opencv_python-3.4.3.18-cp37-cp37m-linux_armv7l.whl
 	sudo pip3 install ${config_path}/pip/opencv_contrib_python-3.4.3.18-cp37-cp37m-linux_armv7l.whl
 
-	format_echo "PIP安装ruamel.yaml包" 1
+	format_echo "PIP安装ruamel.yaml包"
 	sudo pip3 install ${config_path}/pip/ruamel.yaml-0.16.10-py2.py3-none-any.whl
 	sleep 1
 	

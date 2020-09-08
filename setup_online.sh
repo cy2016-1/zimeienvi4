@@ -30,17 +30,16 @@ calc_wt_size
 #开始接收输入
 start(){
 	FUN=$(whiptail --title "请选择安装软件（直接选中回车）" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button 取消 --ok-button 确定 \
-		"1" "一键安装设置全部环境" \
-		"2" "修改pi和root用户密码" \
-		"3" "设置系统时区和语言默认为中文" \
-        "4" "安装声卡驱动" \
-        "5" "安装自美系统必备模块" \
-        "R" "还原离线安装环境" \
+		"A" "一键安装设置全部环境" \
+		"1" "修改pi和root用户密码" \
+		"2" "设置系统时区和语言默认为中文" \
+        "3" "安装声卡驱动" \
+        "4" "安装自美系统必备模块" \
         "X" "退出"\
         3>&1 1>&2 2>&3)
 
 	case $FUN in
-		1)
+		"a"|"A")
 	    	format_echo "一键安装全部环境"
 	    	akey_setup
 	    ;;
@@ -60,10 +59,6 @@ start(){
 	    	format_echo '开始环境必备模块'
 	    	setup_other
 	    ;;
-	    "r"|"R")
-	    	format_echo '还原离线安装环境'
-	    	reduct_sources
-	    ;;
 	    "x"|"X")
 	    	format_echo '成功退出！' 1
 	    ;;
@@ -77,11 +72,17 @@ start(){
  # @说明: 修改用户密码
 ###
 set_userpass(){
-	format_echo "设置 Pi 密码" 1
-	sudo passwd pi
+	format_echo "修改Pi用户密码为: Keyicx" 1
+	sudo passwd pi <<EOF
+Keyicx
+Keyicx
+EOF
 
-	format_echo "设置 Root 密码:" 1
-	sudo passwd root
+	format_echo "修改Root用户密码: Keyicx" 1
+	sudo passwd root <<EOF
+Keyicx
+Keyicx
+EOF
 
 	if [ $IS_AKEY -eq 0 ]; then start; fi
 }
@@ -99,68 +100,6 @@ set_localtime(){
 	if [ $IS_AKEY -eq 0 ]; then start; fi
 }
 
-#安装初始化
-setup_init(){
-	if [ $IS_INIT -eq 1 ]
-	then 
-		format_echo "离线安装环境已经初始化" 1
-		sleep 1
-		return 0
-	fi
-		#给包文件夹可读写权限
-	sudo chmod -R 777 ${config_path}/apt_get/
-
-	format_echo "生成包索引文件"
-	sudo touch ${config_path}/apt_get/Packages.gz
-	sleep 1
-
-	cd ${config_path}
-
-	format_echo "创建索引"
-	sudo dpkg-scanpackages ${config_path}/apt_get /dev/null | gzip > ${config_path}/apt_get/Packages.gz
-	sleep 1
-
-	format_echo "替换源列表"
-	sudo mkdir -p /etc/apt_bak/sources.list.d
-	if [ ! -f "/etc/apt_bak/sources.list.default" ];then
-		sudo mv /etc/apt/sources.list /etc/apt_bak/sources.list.default
-	fi
-	sudo cp -f ${config_path}/config/sources.list.local /etc/apt/sources.list
-
-	if [ ! -f "/etc/apt_bak/sources.list.d/raspi.list.default" ];then
-		sudo mv /etc/apt/sources.list.d/raspi.list /etc/apt_bak/sources.list.d/raspi.list.default
-	fi
-	sudo cp -f ${config_path}/config/raspi.list.local /etc/apt/sources.list.d/raspi.list
-	sleep 1
-
-	format_echo "更新软件索引"
-	sudo apt-get update
-
-	format_echo "离线安装环境初始化已完成" 1
-	sleep 1
-
-	IS_INIT=1
-}
-
-#还原sources源
-reduct_sources(){
-	format_echo "还原源列表"
-	if [ -f "/etc/apt_bak/sources.list.default" ];then
-		sudo mv /etc/apt_bak/sources.list.default /etc/apt/sources.list
-	fi
-	if [ -f "/etc/apt_bak/sources.list.d/raspi.list.default" ];then
-		sudo mv /etc/apt_bak/sources.list.d/raspi.list.default /etc/apt/sources.list.d/raspi.list
-	fi
-
-	format_echo "更新软件索引"
-	sudo apt-get update
-	
-	format_echo "还原源列表完成" 1
-	sleep 1
-
-	if [ $IS_AKEY -eq 0 ]; then start; fi
-}
-
 #安装声卡
 setup_sound(){
 	format_echo "开始安装声卡驱动"
@@ -173,9 +112,6 @@ setup_sound(){
 		if [ $IS_AKEY -eq 0 ]; then start; fi
 		return 0
 	fi
-
-	# 使用本地源安装 
-	#setup_init
 
 	sudo apt-get -y install raspberrypi-kernel-headers raspberrypi-kernel
 	sudo apt-get -y install dkms git i2c-tools libasound2-plugins
@@ -234,9 +170,6 @@ setup_other(){
 	# 系统基本设置
 	set_system
 
-	# 使用本地源安装 如果用户没有安装声音，这一步还是需要做
-	#setup_init
-
 	format_echo "安装基本库"
 	sudo apt-get -y install libjpeg-dev
 	sudo apt-get -y install libhdf5-dev
@@ -294,6 +227,9 @@ setup_other(){
 	sudo pip3 install ${config_path}/pip/opencv_python-3.4.3.18-cp37-cp37m-linux_armv7l.whl
 	sudo pip3 install ${config_path}/pip/opencv_contrib_python-3.4.3.18-cp37-cp37m-linux_armv7l.whl
 
+	format_echo "PIP安装ruamel.yaml包"
+	sudo pip3 install ${config_path}/pip/ruamel.yaml-0.16.10-py2.py3-none-any.whl
+
 	format_echo "安装其他功能包完成" 1
 	sleep 1
 	
@@ -307,7 +243,6 @@ akey_setup(){
 	set_localtime
 	setup_sound
 	setup_other
-	reduct_sources
 	IS_AKEY=0
 }
 
