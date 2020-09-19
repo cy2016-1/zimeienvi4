@@ -190,6 +190,10 @@ set_system(){
 	format_echo "设备顶部LOGO不显示"
 	sudo sed -i s/'console=tty1'/'console=tty3'/g /boot/cmdline.txt
 	sudo sed -i s/'ignore-serial-consoles'/'ignore-serial-consoles logo.nologo loglevel=3'/g /boot/cmdline.txt
+
+	format_echo "启用WiFi"
+	sudo rfkill unblock wifi
+	sudo rfkill unblock all
 }
 
 # 系统时区设置
