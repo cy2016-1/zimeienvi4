@@ -185,7 +185,7 @@ set_system(){
 	sudo rm -f /usr/share/rpd-wallpaper/road.jpg
 	sleep 1
 	
-	sudo cp -f ${config_path}/config/fjord.jpg /usr/share/rpd-wallpaper/road.jpg
+	sudo cp -f ${config_path}/config/rord.jpg /usr/share/rpd-wallpaper/road.jpg
 
 	format_echo "设备顶部LOGO不显示"
 	sudo sed -i s/'console=tty1'/'console=tty3'/g /boot/cmdline.txt
