@@ -185,7 +185,7 @@ set_system(){
 	sudo rm -f /usr/share/rpd-wallpaper/road.jpg
 	sleep 1
 	
-	sudo cp -f ${config_path}/config/rord.jpg /usr/share/rpd-wallpaper/road.jpg
+	sudo cp -f ${config_path}/config/road.jpg /usr/share/rpd-wallpaper/road.jpg
 
 	format_echo "设备顶部LOGO不显示"
 	sudo sed -i s/'console=tty1'/'console=tty3'/g /boot/cmdline.txt
@@ -395,26 +395,26 @@ setup_other(){
 	sudo dpkg -i ${config_path}/apt_get/*.deb
 
 	format_echo "PIP安装pycurl包"
-	sudo pip3 install ${config_path}/pip/pycurl-7.43.0.3-cp37-cp37m-linux_armv7l.whl
+	sudo pip3 install ${config_path}/pip/pycurl-*.whl
 
 	format_echo "PIP安装psutil包"
-	sudo pip3 install ${config_path}/pip/psutil-5.6.2.tar.gz
+	sudo pip3 install ${config_path}/pip/psutil-*.gz
 	
 	format_echo "PIP安装websocket_client包"
-	sudo pip3 install ${config_path}/pip/websocket_client-0.56.0-py2.py3-none-any.whl
+	sudo pip3 install ${config_path}/pip/websocket_client-*.whl
 
 	format_echo "PIP安装webrtcvad包"
-	sudo pip3 install ${config_path}/pip/webrtcvad-2.0.10-cp37-cp37m-linux_armv7l.whl
+	sudo pip3 install ${config_path}/pip/webrtcvad-*.whl
 
 	format_echo "PIP安装imutils包"
-	sudo pip3 install ${config_path}/pip/imutils-0.5.3-py3-none-any.whl
+	sudo pip3 install ${config_path}/pip/imutils-*.whl
 
 	format_echo "PIP安装opencv包"
-	sudo pip3 install ${config_path}/pip/opencv_python-3.4.3.18-cp37-cp37m-linux_armv7l.whl
-	sudo pip3 install ${config_path}/pip/opencv_contrib_python-3.4.3.18-cp37-cp37m-linux_armv7l.whl
+	sudo pip3 install ${config_path}/pip/opencv_python-*.whl
+	sudo pip3 install ${config_path}/pip/opencv_contrib_python-*.whl
 
 	format_echo "PIP安装ruamel.yaml包"
-	sudo pip3 install ${config_path}/pip/ruamel.yaml-0.16.10-py2.py3-none-any.whl
+	sudo pip3 install ${config_path}/pip/ruamel.yaml-*.whl
 	sleep 1
 	
 	if [ $IS_AKEY -eq 0 ]; then start; fi	
