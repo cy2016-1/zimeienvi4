@@ -1,12 +1,14 @@
 #!/bin/sh
 
-#是否初始化过离线安装环境
+#是否初始化过在线安装环境
 IS_INIT=0
 
 #是否一键安装
 IS_AKEY=0
 
 config_path='/tmp/zimeiconf'
+
+CONFIG=/boot/config.txt
 
 THIS_PATH=$(cd `dirname $0`; pwd)
 
@@ -19,6 +21,56 @@ format_echo(){
 	fi
 }
 
+set_config_var() {
+  lua - "$1" "$2" "$3" <<EOF > "$3.bak"
+local key=assert(arg[1])
+local value=assert(arg[2])
+local fn=assert(arg[3])
+local file=assert(io.open(fn))
+local made_change=false
+for line in file:lines() do
+  if line:match("^#?%s*"..key.."=.*$") then
+    line=key.."="..value
+    made_change=true
+  end
+  print(line)
+end
+
+if not made_change then
+  print(key.."="..value)
+end
+EOF
+sudo mv "$3.bak" "$3"
+}
+
+#获取指定配置文件中对应的值
+get_config_var() {
+  lua - "$1" "$2" <<EOF
+local key=assert(arg[1])
+local fn=assert(arg[2])
+local file=assert(io.open(fn))
+local found=false
+for line in file:lines() do
+  local val = line:match("^%s*"..key.."=(.*)$")
+  if (val ~= nil) then
+    print(val)
+    found=true
+    break
+  end
+end
+if not found then
+   print(0)
+end
+EOF
+}
+
+
+#删除一些不要的软件
+del_garbage(){
+	sudo rm -f /etc/xdg/autostart/piwiz.desktop
+}
+del_garbage
+
 # 设置菜单大小
 calc_wt_size() {
   WT_HEIGHT=16
@@ -30,12 +82,14 @@ calc_wt_size
 #开始接收输入
 start(){
 	FUN=$(whiptail --title "请选择安装软件（直接选中回车）" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button 取消 --ok-button 确定 \
-		"A" "一键安装设置全部环境" \
-		"1" "修改pi和root用户密码" \
-		"2" "设置系统时区和语言默认为中文" \
-        "3" "安装声卡驱动" \
-        "4" "安装自美系统必备模块" \
-        "X" "退出"\
+		"A" "一键安装设置全部环境（在线版）" \
+		"1" "修改pi和root用户密码为: Keyicx" \
+		"2" "系统基本设置" \
+		"3" "安装默认摄像头驱动" \
+        "4" "安装声卡驱动" \
+        "5" "安装自美系统必备模块" \
+        "6" "安装MQTT服务器模块" \
+        "X" "退出" \
         3>&1 1>&2 2>&3)
 
 	case $FUN in
@@ -43,13 +97,17 @@ start(){
 	    	format_echo "一键安装全部环境"
 	    	akey_setup
 	    ;;
-		2)
-	    	format_echo "开始修改pi和root用户密码"
+		1)
+	    	format_echo "开始修改pi和root用户密码为: Keyicx"
 	    	set_userpass
 	    ;;
-		3)
-	    	format_echo "设置系统语言默认为中文"
+		2)
+	    	format_echo "系统基本设置"
 	    	set_localtime
+	    ;;
+	    3)
+	    	format_echo "开始安装摄像头驱动"
+	    	setup_camera
 	    ;;
 	    4)
 	    	format_echo "开始安装声卡驱动"
@@ -58,6 +116,10 @@ start(){
 	    5)
 	    	format_echo '开始环境必备模块'
 	    	setup_other
+	    ;;
+	    6)
+	    	format_echo '开始安装MQTT服务器'
+	    	setup_mosquitto
 	    ;;
 	    "x"|"X")
 	    	format_echo '成功退出！' 1
@@ -72,55 +134,17 @@ start(){
  # @说明: 修改用户密码
 ###
 set_userpass(){
-	format_echo "修改Pi用户密码为: Keyicx" 1
+	format_echo "修改Pi用户密码为: Keyicx"
 	sudo passwd pi <<EOF
 Keyicx
 Keyicx
 EOF
 
-	format_echo "修改Root用户密码: Keyicx" 1
+	format_echo "修改Root用户密码: Keyicx"
 	sudo passwd root <<EOF
 Keyicx
 Keyicx
 EOF
-
-	if [ $IS_AKEY -eq 0 ]; then start; fi
-}
-
-# 系统时区设置
-set_localtime(){
-	format_echo "系统时区设置"
-	sudo cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-	format_echo "设置语言默认为中文"
-	sudo cp -f ${config_path}/config/locale.gen /etc/locale.gen
-	sudo locale-gen
-	sudo localectl set-locale LANG=zh_CN.UTF-8
-
-	if [ $IS_AKEY -eq 0 ]; then start; fi
-}
-
-#安装声卡
-setup_sound(){
-	format_echo "开始安装声卡驱动"
-
-	comm=`arecord -l | grep "wm8960-soundcard"`
-	if [ "$comm" != "" ]
-	then
-		format_echo "声卡驱动已经安装！" 1
-		sleep 1
-		if [ $IS_AKEY -eq 0 ]; then start; fi
-		return 0
-	fi
-
-	sudo apt-get -y install raspberrypi-kernel-headers raspberrypi-kernel
-	sudo apt-get -y install dkms git i2c-tools libasound2-plugins
-
-	sudo chmod -R 777 ${config_path}/Github/
-
-	cd ${config_path}/Github/
-
-	sudo ./install.sh
 
 	if [ $IS_AKEY -eq 0 ]; then start; fi
 }
@@ -161,14 +185,130 @@ set_system(){
 	format_echo "设备顶部LOGO不显示"
 	sudo sed -i s/'console=tty1'/'console=tty3'/g /boot/cmdline.txt
 	sudo sed -i s/'ignore-serial-consoles'/'ignore-serial-consoles logo.nologo loglevel=3'/g /boot/cmdline.txt
+
+	format_echo "启用WiFi"
+	sudo rfkill unblock wifi
+	sudo rfkill unblock all
+}
+
+# 系统时区设置
+set_localtime(){
+	format_echo "系统时区设置"
+	sudo cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+	format_echo "设置语言默认为中文"
+	sudo cp -f ${config_path}/config/locale.gen /etc/locale.gen
+	sudo locale-gen
+	sudo localectl set-locale LANG=zh_CN.UTF-8
+
+	# 系统基本设置
+	set_system
+
+	if [ $IS_AKEY -eq 0 ]; then start; fi
+}
+
+get_camera() {
+  CAM=$(get_config_var start_x $CONFIG)
+  if [ $CAM -eq 1 ]; then
+    echo 0
+  else
+    echo 1
+  fi
+}
+
+#安装摄像头
+setup_camera() {
+  if [ ! -e /boot/start_x.elf ]; then
+  	whiptail --msgbox "您的系统版本太旧了(没有start_x.elf)。请更新系统" 20 60 2
+    return 1
+  fi
+  sed $CONFIG -i -e "s/^startx/#startx/"
+  sed $CONFIG -i -e "s/^fixup_file/#fixup_file/"
+
+  DEFAULT=--defaultno
+  CURRENT=0
+  if [ $(get_camera) -eq 0 ]; then
+    DEFAULT=
+    CURRENT=1
+  fi
+
+  RET=1
+  if [ $IS_AKEY -eq 0 ]; then
+    if (whiptail --yes-button "启用" --no-button "禁用" --yesno "您是否启用摄像头?" 20 60) then
+    	RET=1
+    else
+    	RET=0
+    fi
+  fi
+
+  if [ $RET -eq $CURRENT ]; then
+    STATUS="启用"
+    return 1
+  fi
+  
+  if [ $RET -eq 1 ]; then
+    set_config_var start_x 1 $CONFIG
+    CUR_GPU_MEM=$(get_config_var gpu_mem $CONFIG)
+    if [ -z "$CUR_GPU_MEM" ] || [ "$CUR_GPU_MEM" -lt 128 ]; then
+      set_config_var gpu_mem 128 $CONFIG
+    fi
+    STATUS="启用"
+  elif [ $RET -eq 0 ]; then
+    set_config_var start_x 0 $CONFIG
+    sed $CONFIG -i -e "s/^start_file/#start_file/"
+    STATUS="禁用"
+  else
+    return $RET
+  fi
+  
+  if [ $IS_AKEY -eq 0 ]; then
+    whiptail --msgbox "摄像头已 $STATUS" 20 60 1
+  fi
+}
+
+#安装声卡
+setup_sound(){
+	format_echo "开始安装声卡驱动"
+
+	comm=`arecord -l | grep "wm8960-soundcard"`
+	if [ "$comm" != "" ]
+	then
+		format_echo "声卡驱动已经安装！" 1
+		sleep 1
+		if [ $IS_AKEY -eq 0 ]; then start; fi
+		return 0
+	fi
+
+	sudo chmod -R 777 ${config_path}/Github/
+
+	cd ${config_path}/Github/
+
+	sudo ./install.sh
+
+	if [ $IS_AKEY -eq 0 ]; then start; fi
+}
+
+setup_mosquitto(){
+	format_echo "开始安装mqtt服务器"
+
+	format_echo "安装依赖"
+	sudo apt-get install libssl-dev libc-ares-dev uuid-dev g++
+
+	cd ${config_path}
+	sudo tar zxfv ${config_path}/pip/mosquitto-1.6.9.tar.gz
+	cd ${config_path}/mosquitto-1.6.9
+	sudo make
+	sudo make install
+	sudo ln -s /usr/local/lib/libmosquitto.so.1 /usr/lib/libmosquitto.so.1
+	sudo ldconfig
+	sudo cp -f ${config_path}/config/mosquitto.conf /etc/mosquitto/mosquitto.conf
+	cd ${config_path}
+
+	if [ $IS_AKEY -eq 0 ]; then start; fi
 }
 
 #安装其他功能包
 setup_other(){
-	format_echo "安装视频环境"
-
-	# 系统基本设置
-	set_system
 
 	format_echo "安装基本库"
 	sudo apt-get -y install libjpeg-dev
@@ -209,28 +349,26 @@ setup_other(){
 	sudo apt-get -y install ntpdate
 
 	format_echo "PIP安装pycurl包"
-	sudo pip3 install ${config_path}/pip/pycurl-7.43.0.3-cp37-cp37m-linux_armv7l.whl
+	sudo pip3 install pycurl
 
 	format_echo "PIP安装psutil包"
-	sudo pip3 install ${config_path}/pip/psutil-5.6.2.tar.gz
+	sudo pip3 install psutil
 	
 	format_echo "PIP安装websocket_client包"
-	sudo pip3 install ${config_path}/pip/websocket_client-0.56.0-py2.py3-none-any.whl
+	sudo pip3 install websocket_client
 
 	format_echo "PIP安装webrtcvad包"
-	sudo pip3 install ${config_path}/pip/webrtcvad-2.0.10-cp37-cp37m-linux_armv7l.whl
+	sudo pip3 install webrtcvad
 
 	format_echo "PIP安装imutils包"
-	sudo pip3 install ${config_path}/pip/imutils-0.5.3-py3-none-any.whl
+	sudo pip3 install imutils
 
 	format_echo "PIP安装opencv包"
-	sudo pip3 install ${config_path}/pip/opencv_python-3.4.3.18-cp37-cp37m-linux_armv7l.whl
-	sudo pip3 install ${config_path}/pip/opencv_contrib_python-3.4.3.18-cp37-cp37m-linux_armv7l.whl
+	sudo pip3 install opencv_python
+	sudo pip3 install opencv_contrib_python
 
 	format_echo "PIP安装ruamel.yaml包"
-	sudo pip3 install ${config_path}/pip/ruamel.yaml-0.16.10-py2.py3-none-any.whl
-
-	format_echo "安装其他功能包完成" 1
+	sudo pip3 install ruamel.yaml
 	sleep 1
 	
 	if [ $IS_AKEY -eq 0 ]; then start; fi	
@@ -241,8 +379,10 @@ akey_setup(){
 	IS_AKEY=1
 	set_userpass
 	set_localtime
+	setup_camera
 	setup_sound
 	setup_other
+	setup_mosquitto
 	IS_AKEY=0
 }
 
