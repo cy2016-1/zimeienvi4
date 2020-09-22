@@ -7,6 +7,7 @@ IS_INIT=0
 IS_AKEY=0
 
 config_path='/tmp/zimeiconf'
+pip3_downpath='/var/pipdownpath'
 
 CONFIG=/boot/config.txt
 
@@ -295,7 +296,7 @@ setup_mosquitto(){
 	sudo apt-get install libssl-dev libc-ares-dev uuid-dev g++
 
 	cd ${config_path}
-	sudo tar zxfv ${config_path}/pip/mosquitto-1.6.9.tar.gz
+	sudo tar zxfv ${config_path}/mqtt/mosquitto-1.6.9.tar.gz
 	cd ${config_path}/mosquitto-1.6.9
 	sudo make
 	sudo make install
@@ -350,25 +351,35 @@ setup_other(){
 
 	format_echo "PIP安装pycurl包"
 	sudo pip3 install pycurl
+	sudo pip3 download pycurl -d ${pip3_downpath}
 
 	format_echo "PIP安装psutil包"
 	sudo pip3 install psutil
+	sudo pip3 download psutil -d ${pip3_downpath}
 	
 	format_echo "PIP安装websocket_client包"
 	sudo pip3 install websocket_client
+	sudo pip3 download websocket_client -d ${pip3_downpath}
 
 	format_echo "PIP安装webrtcvad包"
 	sudo pip3 install webrtcvad
+	sudo pip3 download webrtcvad -d ${pip3_downpath}
 
 	format_echo "PIP安装imutils包"
 	sudo pip3 install imutils
+	sudo pip3 download imutils -d ${pip3_downpath}
 
 	format_echo "PIP安装opencv包"
 	sudo pip3 install opencv_python
 	sudo pip3 install opencv_contrib_python
+	sudo pip3 download opencv_python -d ${pip3_downpath}
+	sudo pip3 download opencv_contrib_python -d ${pip3_downpath}
+
 
 	format_echo "PIP安装ruamel.yaml包"
 	sudo pip3 install ruamel.yaml
+	sudo pip3 download ruamel.yaml -d ${pip3_downpath}
+
 	sleep 1
 	
 	if [ $IS_AKEY -eq 0 ]; then start; fi	

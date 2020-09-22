@@ -352,14 +352,14 @@ setup_sound(){
 	setup_init
 
 	format_echo "安装声卡依赖"
-	sudo dpkg -i ${config_path}/sound/raspberrypi-kernel-headers_*.deb	
-	sudo dpkg -i ${config_path}/sound/raspberrypi-kernel_*.deb
-	sudo dpkg -i ${config_path}/sound/dkms_*.deb
-	sudo dpkg -i ${config_path}/sound/libasound2-plugins_*.deb
+	sudo dpkg -i ${config_path}/apt_get/raspberrypi-kernel-headers_*.deb	
+	sudo dpkg -i ${config_path}/apt_get/raspberrypi-kernel_*.deb
+	sudo dpkg -i ${config_path}/apt_get/dkms_*.deb
+	sudo dpkg -i ${config_path}/apt_get/libasound2-plugins_*.deb
 
-	sudo chmod -R 777 ${config_path}/Github/
+	sudo chmod -R 777 ${config_path}/wm8960/
 
-	cd ${config_path}/Github/
+	cd ${config_path}/wm8960/
 
 	sudo ./install.sh
 
@@ -374,7 +374,7 @@ setup_mosquitto(){
 	sudo dpkg -i ${config_path}/apt_get/libssl*.deb
 	sudo dpkg -i ${config_path}/apt_get/libc-ares*.deb
 	sudo dpkg -i ${config_path}/apt_get/uuid*.deb
-	sudo tar zxfv ${config_path}/pip/mosquitto-1.6.9.tar.gz
+	sudo tar zxfv ${config_path}/mqtt/mosquitto-1.6.9.tar.gz
 	cd ${config_path}/mosquitto-1.6.9
 	sudo make
 	sudo make install
@@ -394,27 +394,12 @@ setup_other(){
 	format_echo "安装基本库"
 	sudo dpkg -i ${config_path}/apt_get/*.deb
 
-	format_echo "PIP安装pycurl包"
-	sudo pip3 install ${config_path}/pip/pycurl-*.whl
+	format_echo "PIP3安装.whl类型库"
+	sudo pip3 install ${config_path}/pip/*.whl
 
-	format_echo "PIP安装psutil包"
-	sudo pip3 install ${config_path}/pip/psutil-*.gz
+	format_echo "PIP3安装.gz类型包"
+	sudo pip3 install ${config_path}/pip/*.gz
 	
-	format_echo "PIP安装websocket_client包"
-	sudo pip3 install ${config_path}/pip/websocket_client-*.whl
-
-	format_echo "PIP安装webrtcvad包"
-	sudo pip3 install ${config_path}/pip/webrtcvad-*.whl
-
-	format_echo "PIP安装imutils包"
-	sudo pip3 install ${config_path}/pip/imutils-*.whl
-
-	format_echo "PIP安装opencv包"
-	sudo pip3 install ${config_path}/pip/opencv_python-*.whl
-	sudo pip3 install ${config_path}/pip/opencv_contrib_python-*.whl
-
-	format_echo "PIP安装ruamel.yaml包"
-	sudo pip3 install ${config_path}/pip/ruamel.yaml-*.whl
 	sleep 1
 	
 	if [ $IS_AKEY -eq 0 ]; then start; fi	
