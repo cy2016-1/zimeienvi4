@@ -187,6 +187,11 @@ set_system(){
 	
 	sudo cp -f ${config_path}/config/road.jpg /usr/share/rpd-wallpaper/road.jpg
 
+	format_echo "关闭屏幕保护"
+	if [ ! -f "/etc/profile.d/offScreensaver.sh" ];then
+	sudo echo -e 'xset dpms 0 0 0\nxset s off' > /etc/profile.d/offScreensaver.sh
+	fi
+
 	format_echo "设备顶部LOGO不显示"
 	sudo sed -i s/'console=tty1'/'console=tty3'/g /boot/cmdline.txt
 	sudo sed -i s/'ignore-serial-consoles'/'ignore-serial-consoles logo.nologo loglevel=3'/g /boot/cmdline.txt
