@@ -80,6 +80,26 @@ calc_wt_size() {
 }
 calc_wt_size
 
+#获取VNC状态
+#返回1 -- 未启用 0 -- 已启用
+get_vnc() {
+  if systemctl status vncserver-x11-serviced.service | grep -q inactive; then
+  	echo 1
+  else
+  	echo 0
+  fi
+}
+
+#获取SSH状态
+#返回1 -- 未启用 0 -- 已启用
+get_ssh() {
+  if service ssh status | grep -q inactive; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
 #开始接收输入
 start(){
 	FUN=$(whiptail --title "请选择安装软件（直接选中回车）" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button 取消 --ok-button 确定 \
@@ -195,6 +215,30 @@ set_system(){
 	format_echo "启用WiFi"
 	sudo rfkill unblock wifi
 	sudo rfkill unblock all
+
+	if [ $(get_vnc) -eq 1 ]; then
+		format_echo "开启VNC"
+		#没启用，开始安装
+		if [ ! -d /usr/share/doc/realvnc-vnc-server ]; then
+	    	sudo apt-get install -y realvnc-vnc-server
+		fi
+		sudo systemctl enable vncserver-x11-serviced.service
+		sudo systemctl start vncserver-x11-serviced.service
+	fi
+
+	#开启root用户SSH登录权限
+	if [ $(cat /etc/ssh/sshd_config | grep -c "PermitRootLogin yes") -eq 0 ];then
+		format_echo "打开root登录，设置端口：21232"
+		sudo sed -i -E 's/^\#?Port.+/Port 21232/g' /etc/ssh/sshd_config
+		sudo sed -i -E 's/^\#?PermitRootLogin.+/PermitRootLogin yes/g' /etc/ssh/sshd_config
+	fi
+	if [ $(get_ssh) -eq 1 ]; then
+		format_echo "启用ssh服务"
+		sudo passwd --unlock root
+		sudo ssh-keygen -A
+		sudo systemctl enable ssh
+		sudo systemctl start ssh
+	fi
 }
 
 # 系统时区设置
